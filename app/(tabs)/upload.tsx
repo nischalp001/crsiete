@@ -1,10 +1,30 @@
+import * as ImagePicker from 'expo-image-picker';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function UploadScreen() {
-  const handleUpload = () => {
-    // Logic to handle file upload (e.g., open file picker)
-    console.log('Upload triggered');
+const UploadScreen: React.FC = () => {
+  const handleUpload = async () => {
+    // Request permission to access the gallery
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission denied', 'Please allow access to your gallery');
+      return;
+    }
+
+    // Open the gallery
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const imageUri: string = result.assets[0].uri;
+      console.log('Selected image URI:', imageUri);
+      // Handle the image (e.g., upload to server or display)
+    } else {
+      console.log('User cancelled image picker');
+    }
   };
 
   return (
@@ -20,7 +40,9 @@ export default function UploadScreen() {
       <Text style={styles.uploadText}>Click here to add your content</Text>
     </View>
   );
-}
+};
+
+export default UploadScreen;
 
 const styles = StyleSheet.create({
   container: {
