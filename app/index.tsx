@@ -19,7 +19,7 @@ export default function Index() {
       if (loggedIn) {
         router.replace('/(tabs)'); // If logged in, go to tabs
       } else {
-        router.replace('/auth/login'); // Else go to login
+        router.replace('/(tabs)/login'); // Else go to login
       }
       setLoading(false);
     };

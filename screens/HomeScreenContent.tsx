@@ -1,25 +1,25 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, Pressable, Dimensions } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { Dimensions, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const dummyPosts = [
   {
     id: '1',
-    username: 'nischalpuri',
+    username: 'nischalp_07',
     avatar: 'https://i.pravatar.cc/100?img=1',
     postImage: 'https://images.pexels.com/photos/237266/pexels-photo-237266.jpeg',
   },
   {
     id: '2',
-    username: 'alex_doe',
+    username: 'anjan',
     avatar: 'https://i.pravatar.cc/100?img=2',
     postImage: 'https://www.befunky.com/images/wp/wp-2018-03-Landscape-Photography-6.jpg?auto=avif,webp&format=jpg&width=944',
   },
   {
     id: '3',
-    username: 'sara_lee',
+    username: 'niyati',
     avatar: 'https://i.pravatar.cc/100?img=3',
     postImage: 'https://iso.500px.com/wp-content/uploads/2014/06/W4A2827-1-3000x2000.jpg',
   },
