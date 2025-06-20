@@ -1,88 +1,113 @@
+'use client';
 import * as ImagePicker from 'expo-image-picker';
-import React from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Button, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { getDB, initDB } from '../../lib/database';
 
-const UploadScreen: React.FC = () => {
-  const handleUpload = async () => {
-    // Request permission to access the gallery
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission denied', 'Please allow access to your gallery');
-      return;
-    }
+interface Rating {
+  id: number;
+  image_uri: string;
+  rating: number;
+  created_at: string;
+}
 
-    // Open the gallery
+export default function UploadScreen() {
+  const [ratings, setRatings] = useState<Rating[]>([]);
+  const db = getDB();
+
+  useEffect(() => {
+    initDB();
+    fetchRatings();
+  }, []);
+
+  const fetchRatings = () => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM ratings ORDER BY created_at DESC;',
+        [],
+        (_, { rows }) => {
+          setRatings(rows._array);
+        }
+      );
+    });
+  };
+
+  const handlePickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      quality: 1,
+      quality: 0.8,
     });
 
-    if (!result.canceled) {
-      const imageUri: string = result.assets[0].uri;
-      console.log('Selected image URI:', imageUri);
-      // Handle the image (e.g., upload to server or display)
-    } else {
-      console.log('User cancelled image picker');
+    if (!result.canceled && result.assets.length > 0) {
+      const imageUri = result.assets[0].uri;
+
+      // Save image URI to database
+      db.transaction(tx => {
+        tx.executeSql(
+          'INSERT INTO ratings (image_uri, rating) VALUES (?, ?);',
+          [imageUri, 0],
+          () => fetchRatings(),
+          (_, err) => {
+            console.error('Insert error:', err);
+            return false;
+          }
+        );
+      });
     }
   };
 
+  const handleDelete = (id: number) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'DELETE FROM ratings WHERE id = ?;',
+        [id],
+        () => fetchRatings(),
+        (_, err) => {
+          console.error('Delete error:', err);
+          return false;
+        }
+      );
+    });
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Your Uploads</Text>
-      <Text style={styles.oops}>OOPS!</Text>
-      <Text style={styles.subtitle}>No Contents Yet...</Text>
+    <View style={{ padding: 20, flex: 1 }}>
+      <Button title="Pick Image" onPress={handlePickImage} />
 
-      <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
-        <Text style={styles.plus}>+</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.uploadText}>Click here to add your content</Text>
+      <FlatList
+        data={ratings}
+        keyExtractor={item => item.id.toString()}
+        numColumns={2}
+        contentContainerStyle={{ marginTop: 20 }}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            <Image source={{ uri: item.image_uri }} style={styles.image} />
+            <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
+              <Text style={{ color: 'white' }}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      />
     </View>
   );
-};
-
-export default UploadScreen;
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+  card: {
+    margin: 8,
+    position: 'relative',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 10,
-  },
-  oops: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 20,
-  },
-  uploadButton: {
-    width: 350,
-    height: 350,
-    borderWidth: 2,
-    borderColor: '#000',
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
+  image: {
+    width: 150,
+    height: 150,
     borderRadius: 10,
-    marginBottom: 10,
   },
-  plus: {
-    fontSize: 40,
-    color: '#000',
-  },
-  uploadText: {
-    fontSize: 16,
-    color: '#007AFF',
+  deleteButton: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: 'red',
+    padding: 6,
+    borderRadius: 6,
   },
 });
