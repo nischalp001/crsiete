@@ -2,10 +2,10 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
-// Simulate auth state - replace with real logic (Firebase, Supabase, etc.)
+// Simulate auth state - replace with actual Supabase/Firebase check later
 const isUserLoggedIn = async () => {
   return new Promise<boolean>((resolve) => {
-    setTimeout(() => resolve(false), 1000); // Simulate loading and return false
+    setTimeout(() => resolve(false), 500); // Simulate user NOT logged in
   });
 };
 
@@ -15,12 +15,17 @@ export default function Index() {
 
   useEffect(() => {
     const checkAuth = async () => {
+      // Delay to ensure navigation stack is ready (important on mobile)
+      await new Promise((res) => setTimeout(res, 100));
+
       const loggedIn = await isUserLoggedIn();
+
       if (loggedIn) {
-        router.replace('/(tabs)'); // If logged in, go to tabs
+        router.replace('/(tabs)'); // Authenticated: go to main app
       } else {
-        router.replace('/(tabs)/login'); // Else go to login
+        router.replace('/auth/login'); // Not authenticated: go to login
       }
+
       setLoading(false);
     };
 

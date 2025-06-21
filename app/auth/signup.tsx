@@ -115,7 +115,7 @@ export default function SignupScreen() {
 
     setUploading(false);
     Alert.alert('Success', 'Signup complete! Please log in.');
-    router.replace('/(tabs)/login');
+    router.replace('/auth/login');
   };
 
   return (
@@ -148,7 +148,7 @@ export default function SignupScreen() {
       )}
 
       <Button title={uploading ? 'Signing Up...' : 'Sign Up'} onPress={handleSignup} disabled={uploading} />
-      <Text style={{ marginTop: 10 }} onPress={() => router.push('/(tabs)/login')}>
+      <Text style={{ marginTop: 10 }} onPress={() => router.push('/auth/login')}>
         Already have an account? Login
       </Text>
     </View>

@@ -12,7 +12,7 @@ function HeaderTitle() {
       fontSize: 25,
       marginLeft: 10,
     }}>
-      Crseite
+      RateMyPic
     </Text>
   );
 }
